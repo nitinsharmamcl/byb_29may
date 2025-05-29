@@ -31,9 +31,9 @@ import { useUser } from "@/context/userContext";
 const Sidebar = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState(null);
   const [isAppDropdownOpen, setIsAppDropdownOpen] = useState(true);
-  const [activeAppStep, setActiveAppStep] = useState<number | null>(null);
+  const [activeAppStep, setActiveAppStep] = useState(null);
   const [hasSubmittedApp, setHasSubmittedApp] = useState(false);
   const [hasGeneratedOffer, setHasGeneratedOffer] = useState(false);
   const [hasCompletedPayment, setHasCompletedPayment] = useState(false);
