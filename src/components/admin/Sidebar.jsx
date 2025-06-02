@@ -12,17 +12,16 @@ import {
   FaBars,
 } from "react-icons/fa";
 import toast from "react-hot-toast";
-import "./sidebar.css"; // Importing the CSS file
+import "./sidebar.css"; 
 
 const Sidebar = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
 
-  // Toggle the sidebar collapse state
   const toggleSidebar = useCallback(() => {
     setIsSidebarCollapsed((prevState) => !prevState);
-    // Persist sidebar state in localStorage
+
     localStorage.setItem("sidebarCollapsed", (!isSidebarCollapsed).toString());
   }, [isSidebarCollapsed]);
 
@@ -33,7 +32,7 @@ const Sidebar = () => {
   };
 
   useEffect(() => {
-    // Get sidebar collapse state from localStorage on load
+
     const stored = localStorage.getItem("sidebarCollapsed");
     if (stored === "true") {
       setIsSidebarCollapsed(true);
