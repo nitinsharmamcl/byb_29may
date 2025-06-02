@@ -6,6 +6,7 @@ import axios from 'axios';
 import { FaUniversity, FaMapMarkerAlt, FaMoneyBillWave, FaBuilding, FaGraduationCap, FaArrowRight, FaSpinner, FaInfoCircle, FaBookOpen, FaChevronLeft } from 'react-icons/fa'; // Added FaInfoCircle, FaBookOpen, FaChevronLeft
 // import Header from '@/components/Header'; // Assuming you have a Header component
 // import Footer from '@/components/Footer'; // Assuming you have a Footer component
+import { HiMenu, HiX, HiArrowRight } from 'react-icons/hi';
 
 const UniversityDetailPage = () => {
   const params = useParams();
@@ -13,7 +14,7 @@ const UniversityDetailPage = () => {
   const router = useRouter(); // Initialize useRouter
   const { universityId } = params;
   const degreeType = searchParams.get('degreeType'); // Re-enable reading degreeType
-
+  const [isScrolled, setIsScrolled] = useState(false);
   const [university, setUniversity] = useState(null);
   const [programs, setPrograms] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -21,12 +22,46 @@ const UniversityDetailPage = () => {
   const [countries, setCountries] = useState([]);
 
   const start_api = process.env.NEXT_PUBLIC_API_URL || "";
-
+   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const handleNavClick = (href) => {
+    if (href === '#') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      const element = document.querySelector(href);
+      if (element) {
+        const navbarHeight = document.querySelector('header')?.offsetHeight || 0;
+        const topOffset = element.getBoundingClientRect().top + window.pageYOffset - navbarHeight;
+        window.scrollTo({ top: topOffset, behavior: 'smooth' });
+      }
+    }
+    setIsMenuOpen(false);
+  };
   useEffect(() => {
     axios.post(`${start_api}/api/countries/allcountries`)
       .then(res => setCountries(res.data || []))
       .catch(err => console.error("Error fetching countries:", err));
   }, [start_api]);
+
+
+    useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
+  const navItems = [
+    { name: 'Home', href: '#' },
+    { name: 'Colleges', href: '#colleges' },
+    { name: 'Courses', href: '#courses' },
+    { name: 'Programs', href: '#programs' },
+    // { name: 'Reviews', href: '#testimonials' },
+    { name: 'Counseling', href: '#counseling' }
+  ];
 
   useEffect(() => {
     // Fetch University Details (remains largely the same)
@@ -40,7 +75,7 @@ const UniversityDetailPage = () => {
         .then(res => {
           if (res.data && res.data.university) {
             setUniversity(res.data.university);
-            console.log('[Debug] University data:', res.data.university);
+            console.log('[Debug] University data:', res.data);
           } else {
             setError('University not found.');
             console.warn('[Debug] University not found for ID:', universityId);
@@ -149,10 +184,89 @@ const UniversityDetailPage = () => {
     );
   }
 
+
   return (
     <>
-      {/* <Header /> */}
+ 
       <div className="bg-gradient-to-br from-gray-100 to-blue-50 min-h-screen">
+
+        <header className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${isScrolled ? 'navbar-sticky' : 'bg-transparent'}`}>
+        <div className="container mx-auto px-4 md:px-6 lg:px-8">
+          <nav className="flex items-center justify-between py-3">
+            {/* Logo */}
+            <a href="#" className="flex items-center animate-fade-in">
+              <div className="text-3xl font-extrabold">
+             <img src={"/images/logo.png"} alt=""  style={{width:"150px",marginRight:"50px",marginLeft:"-65px"}}/>
+              </div>
+            </a>
+            
+            <div className="hidden lg:flex items-center space-x-6 animate-slide-down text-black">
+              {navItems.map((item, index) => (
+                <a 
+                  key={index}
+                  onClick={() => handleNavClick(item.href)}
+                  className={`font-semibold ${item.name === 'Home' ? 'text-black' : 'text-navy hover:text-black'} transition-colors cursor-pointer`}
+                >
+                  {item.name}
+                </a>
+              ))}
+            </div>
+            
+            {/* Action Buttons */}
+            <div className="flex items-center space-x-3 animate-fade-in">
+              <span 
+                onClick={() => {router.push('/login')}}
+                className="hidden md:inline-block px-5 py-2 rounded-full text-black font-semibold hover:bg-red hover:bg-opacity-10 transition-all cursor-pointer"
+              >
+                Login
+              </span>
+              <span
+                onClick={() => {router.push('/register')}}
+                className="px-5 py-2 bg-gradient-red-to-navy text-white font-semibold rounded-full hover:shadow-lg transition-all transform hover:scale-105 cursor-pointer"
+              style={{marginRight:"-65px"}}>
+                Sign Up
+              </span>
+              
+              {/* Mobile Menu Button */}
+              <button 
+                className="lg:hidden focus:outline-none" 
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                aria-label="Toggle menu"
+              >
+                {isMenuOpen ? (
+                  <HiX className="h-6 w-6 text-navy" />
+                ) : (
+                  <HiMenu className="h-6 w-6 text-navy" />
+                )}
+              </button>
+            </div>
+          </nav>
+        </div>
+        
+        {/* Mobile Menu */}
+        <div className={`lg:hidden bg-white border-t border-gray-100 absolute w-full left-0 ${isMenuOpen ? 'block animate-slide-down' : 'hidden'}`}>
+          <div className="container mx-auto px-4 py-2">
+            <div className="flex flex-col space-y-3 py-3">
+              {navItems.map((item, index) => (
+                <a 
+                  key={index}
+                  onClick={() => handleNavClick(item.href)}
+                  className={`font-semibold ${item.name === 'Home' ? 'text-red' : 'text-navy hover:text-red'} py-2 transition-colors cursor-pointer`}
+                >
+                  {item.name}
+                </a>
+              ))}
+              <a 
+                href="#"
+                className="py-2 font-semibold text-red cursor-pointer"
+              >
+                Login
+              </a>
+            </div>
+          </div>
+        </div>
+      </header>
+
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-20 sm:pt-24">
           {/* Back Button */}
           <button 
@@ -167,9 +281,9 @@ const UniversityDetailPage = () => {
           <div className="bg-white shadow-lg rounded-xl overflow-hidden mb-10">
             <div 
               className="h-48 sm:h-64 bg-cover bg-center relative"
-              style={{ backgroundImage: `url(${university.uni_image || '/images/bg.png'})` }} // Keep image, maybe lighten overlay if needed
+              style={{ backgroundImage: `url(${university?.uni_image})` }} // Keep image, maybe lighten overlay if needed
             >
-              <div className="absolute inset-0 bg-black bg-opacity-30 flex items-end p-6 sm:p-8"> {/* Slightly lighter overlay */}
+              <div className="absolute inset-0 bg-opacity-30 flex items-end p-6 sm:p-8"> {/* Slightly lighter overlay */}
                 <div>
                   <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white shadow-sm">{university.name}</h1>
                   {degreeType && (
