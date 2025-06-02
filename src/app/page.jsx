@@ -335,10 +335,10 @@ const LandingPage = () => {
   const [isUniversityModalOpen, setIsUniversityModalOpen] = useState(false);
   const [loadingUniversities, setLoadingUniversities] = useState(true);
   const [countries, setCountries] = useState([]);
+  const [selectedDegreeType, setSelectedDegreeType] = useState(null); // Add this state for degree type filtering
 
   useEffect(() => {
     // Fetch universities for landing page
-
     
     axios.get(`${start_api}/api/universities`).then((res) => {
       setUniversities(res.data.universities || []);
@@ -350,13 +350,25 @@ const LandingPage = () => {
     });
   }, []);
 
-  const openUniversityModal = (university) => {
+  const openUniversityModal = (university, degreeType = null) => {
     setSelectedUniversity(university);
+    setSelectedDegreeType(degreeType); // Set the selected degree type
     setIsUniversityModalOpen(true);
+   
   };
+
+  const openUniversityProgramsNextPage = (university, degreeType = null) => {
+    let path = `/universities/${university.id}`;
+    if (degreeType) {
+      path += `?degreeType=${degreeType}`;
+    }
+    router.push(path);
+  }
+
   const closeUniversityModal = () => {
     setIsUniversityModalOpen(false);
     setSelectedUniversity(null);
+    setSelectedDegreeType(null); // Reset the selected degree type
   };
 
   // Helper to get country name by id
@@ -718,14 +730,33 @@ const LandingPage = () => {
                         {/* Optionally add a rating or badge here */}
                       </div>
                       <div className="flex flex-wrap gap-2 mb-4">
-                        {university.campus && (
+                        {/* {university.campus && (
                           <span className="px-3 py-1 text-xs font-semibold rounded-full bg-blue-50 text-navy">{university.campus}</span>
                         )}
                         {university.university_country_id && (
                           <span className="px-3 py-1 text-xs font-semibold rounded-full bg-green-50 text-green-600">
                             {getCountryName(university.university_country_id)}
                           </span>
-                        )}
+                        )} */}
+                        {/* Add degree type badges */}
+                        <span 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openUniversityProgramsNextPage(university, 'bachelor');
+                          }}
+                          className="px-3 py-1 text-xs font-semibold rounded-full bg-purple-50 text-purple-600 cursor-pointer hover:bg-purple-100 transition-colors"
+                        >
+                          Bachelor
+                        </span>
+                        <span 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openUniversityProgramsNextPage(university, 'master');
+                          }}
+                          className="px-3 py-1 text-xs font-semibold rounded-full bg-orange-50 text-orange-600 cursor-pointer hover:bg-orange-100 transition-colors"
+                        >
+                          Master
+                        </span>
                       </div>
                       <div className="flex justify-between items-center pt-3 border-t border-gray-100">
                         <div className="text-gray-700">
@@ -734,7 +765,7 @@ const LandingPage = () => {
                         </div>
                         <button
                           className="flex items-center text-sm font-semibold text-navy hover:text-red transition-colors group"
-                          onClick={() => openUniversityModal(university)}
+                          onClick={() => openUniversityModal(university)} // Updated to navigate
                         >
                           <span>View Details</span>
                           <FaArrowRight className="h-4 w-4 ml-1 transition-transform group-hover:translate-x-1" />
@@ -755,7 +786,12 @@ const LandingPage = () => {
               </button>
             </div>
             {isUniversityModalOpen && selectedUniversity && (
-              <UniversityDetailsModal university={selectedUniversity} onClose={closeUniversityModal} countries={countries} />
+              <UniversityDetailsModal 
+                university={selectedUniversity} 
+                onClose={closeUniversityModal} 
+                countries={countries} 
+                selectedDegreeType={selectedDegreeType} // Pass the selected degree type
+              />
             )}
           </div>
         </section>
@@ -1000,7 +1036,7 @@ const LandingPage = () => {
                     </div>
                     <div>
                       <h4 className="text-lg font-semibold text-navy">Career Planning</h4>
-                      <p className="text-gray-700">Insights on career prospects, industry trends, and employment opportunities.</p>
+                      <p className="text-gray-700">Insights into job prospects, industry trends, and future career paths.</p>
                     </div>
                   </div>
                 </div>
@@ -1134,7 +1170,6 @@ const LandingPage = () => {
         </section>
       </main>
 
-      {/* Footer */}
       <footer className="bg-navy text-white">
         <div className="container mx-auto px-4 md:px-6 lg:px-8 py-12 md:py-16">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
@@ -1147,13 +1182,19 @@ const LandingPage = () => {
                 Helping students find their perfect educational path for a successful career and bright future.
               </p>
               <div className="flex space-x-4">
-                {[FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn].map((Icon, index) => (
+                {
+                [{Icon : FaFacebookF, link : "https://www.facebook.com/"},
+                   {Icon : FaTwitter, link : "https://x.com/"},
+                    {Icon : FaInstagram, link : "https://www.instagram.com/"}, 
+                    {Icon : FaLinkedinIn, link : "https://in.linkedin.com/"}
+                  ]
+                .map((Icon, index) => (
                   <a 
                     key={index}
-                    href="#" 
+                    href={Icon.link} 
                     className="w-10 h-10 rounded-full bg-white bg-opacity-10 flex items-center justify-center hover:bg-opacity-20 transition-all transform hover:-translate-y-1"
                   >
-                    <Icon className="w-5 h-5 text-white" />
+                    <Icon.Icon className="w-5 h-5 text-white" />
                   </a>
                 ))}
               </div>
@@ -1224,7 +1265,7 @@ const LandingPage = () => {
                 ))}
               </ul>
               
-              <div className="mt-6">
+              {/* <div className="mt-6">
                 <h5 className="font-semibold mb-3">Subscribe to Newsletter</h5>
                 <form className="flex">
                   <input 
@@ -1238,7 +1279,7 @@ const LandingPage = () => {
                     Subscribe
                   </button>
                 </form>
-              </div>
+              </div> */}
             </div>
           </div>
           

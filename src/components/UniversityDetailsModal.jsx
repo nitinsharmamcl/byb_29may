@@ -1,12 +1,49 @@
-import { useEffect, useRef } from 'react';
-import { FaUniversity, FaMapMarkerAlt, FaMoneyBillWave, FaBuilding } from 'react-icons/fa';
+import { useEffect, useRef, useState } from 'react';
+import { FaUniversity, FaMapMarkerAlt, FaMoneyBillWave, FaBuilding, FaGraduationCap, FaArrowRight } from 'react-icons/fa';
 import PropTypes from 'prop-types';
 import { useRouter } from 'next/navigation';
+import axios from 'axios';
 
-export default function UniversityDetailsModal({ university, onClose, countries = [] }) {
+export default function UniversityDetailsModal({ university, onClose, countries = [], selectedDegreeType }) {
   const modalRef = useRef(null);
-
   const router = useRouter();
+  const [programs, setPrograms] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  // Fetch programs when the modal opens
+  useEffect(() => {
+    if (selectedDegreeType) {
+      setLoading(true);
+      // In a real implementation, you would fetch programs from your API
+      // This is a mock implementation
+      const start_api = process.env.NEXT_PUBLIC_API_URL || "";
+      axios.get(`${start_api}/api/programs`)
+        .then(res => {
+          // Filter programs based on degree type
+          // In a real implementation, you would have a proper filtering mechanism
+          // This is just a simulation
+          const allPrograms = res.data.programs || [];
+          const filteredPrograms = allPrograms.filter(program => {
+            if (selectedDegreeType === 'bachelor') {
+              return program.name.toLowerCase().includes('bachelor') || 
+                     program.description.toLowerCase().includes('bachelor') || 
+                     program.name.toLowerCase().includes('undergraduate');
+            } else if (selectedDegreeType === 'master') {
+              return program.name.toLowerCase().includes('master') || 
+                     program.description.toLowerCase().includes('master') || 
+                     program.name.toLowerCase().includes('postgraduate');
+            }
+            return true;
+          });
+          setPrograms(filteredPrograms);
+          setLoading(false);
+        })
+        .catch(error => {
+          console.error('Error fetching programs:', error);
+          setLoading(false);
+        });
+    }
+  }, [selectedDegreeType]);
 
   useEffect(() => {
     const handleEscape = (e) => {
@@ -65,7 +102,11 @@ export default function UniversityDetailsModal({ university, onClose, countries 
           </div>
           <div>
             <h2 className="modal-title">{university.name}</h2>
-           
+            {selectedDegreeType && (
+              <div className="program-badge">
+                {selectedDegreeType === 'bachelor' ? 'Bachelor Programs' : 'Master Programs'}
+              </div>
+            )}
           </div>
         </div>
         <div className="modal-content">
@@ -87,8 +128,44 @@ export default function UniversityDetailsModal({ university, onClose, countries 
               <div className="detail-label">Country</div>
               <div className="detail-value">{getCountryName(university.university_country_id)}</div>
             </div>
-            
           </div>
+          
+          {selectedDegreeType && (
+            <>
+              <div className="divider"></div>
+              <div className="programs-section">
+                <h3 className="description-title">
+                  {selectedDegreeType === 'bachelor' ? 'Bachelor Programs' : 'Master Programs'}
+                </h3>
+                {loading ? (
+                  <div className="loading-indicator">Loading programs...</div>
+                ) : programs.length > 0 ? (
+                  <div className="programs-grid">
+                    {programs.map((program) => (
+                      <div key={program.id} className="program-card">
+                        <div className="program-icon">
+                          <FaGraduationCap />
+                        </div>
+                        <div className="program-details">
+                          <h4 className="program-name">{program.name}</h4>
+                          <p className="program-description">{program.description}</p>
+                          <button className="program-button">
+                            <span>View Details</span>
+                            <FaArrowRight className="arrow-icon" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="no-programs">
+                    No {selectedDegreeType} programs available for this university.
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+          
           <div className="divider"></div>
           <div className="description-section">
             <h3 className="description-title">Description</h3>
@@ -220,7 +297,7 @@ export default function UniversityDetailsModal({ university, onClose, countries 
           background: linear-gradient(to right, transparent, rgba(0, 51, 102, 0.2), transparent);
           margin: 1.5rem 0;
         }
-        .description-section {
+        .description-section, .programs-section {
           margin-bottom: 2rem;
         }
         .description-title {
@@ -244,6 +321,79 @@ export default function UniversityDetailsModal({ university, onClose, countries 
         .description-text {
           color: #536B88;
           line-height: 1.6;
+        }
+        .programs-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+          gap: 1rem;
+          margin-top: 1rem;
+        }
+        .program-card {
+          display: flex;
+          background-color: #f8fafc;
+          border-radius: 8px;
+          padding: 1rem;
+          transition: all 0.3s ease;
+          border: 1px solid #e2e8f0;
+        }
+        .program-card:hover {
+          transform: translateY(-3px);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+          border-color: #cbd5e0;
+        }
+        .program-icon {
+          font-size: 1.5rem;
+          color: #003366;
+          margin-right: 1rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .program-details {
+          flex: 1;
+        }
+        .program-name {
+          font-weight: 600;
+          color: #003366;
+          margin-bottom: 0.5rem;
+        }
+        .program-description {
+          font-size: 0.875rem;
+          color: #536B88;
+          margin-bottom: 0.75rem;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+        .program-button {
+          display: flex;
+          align-items: center;
+          font-size: 0.875rem;
+          color: #FB0200;
+          font-weight: 500;
+          background: none;
+          border: none;
+          padding: 0;
+          cursor: pointer;
+          transition: color 0.2s ease;
+        }
+        .program-button:hover {
+          color: #003366;
+        }
+        .arrow-icon {
+          margin-left: 0.5rem;
+          font-size: 0.75rem;
+          transition: transform 0.2s ease;
+        }
+        .program-button:hover .arrow-icon {
+          transform: translateX(3px);
+        }
+        .loading-indicator, .no-programs {
+          text-align: center;
+          padding: 2rem;
+          color: #536B88;
+          font-style: italic;
         }
         .action-buttons {
           display: flex;
@@ -299,6 +449,9 @@ export default function UniversityDetailsModal({ university, onClose, countries 
           .action-buttons {
             flex-direction: column;
           }
+          .programs-grid {
+            grid-template-columns: 1fr;
+          }
         }
       `}</style>
     </div>
@@ -314,4 +467,5 @@ UniversityDetailsModal.propTypes = {
       name: PropTypes.string.isRequired,
     })
   ),
-}; 
+  selectedDegreeType: PropTypes.string,
+};

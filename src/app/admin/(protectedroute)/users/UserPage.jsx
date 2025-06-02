@@ -319,7 +319,6 @@ export default function UsersPage() {
     }
   };
 
-  // Function to fetch 10th marks data
   const fetchTenthMarks = async (userId) => {
     if (!userId) {
       toast.error("No 10th marks ID available");
