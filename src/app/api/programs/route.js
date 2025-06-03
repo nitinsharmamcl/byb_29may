@@ -6,7 +6,10 @@ export async function GET() {
     const [programs] = await db.query("SELECT * FROM programs");
     return NextResponse.json({ programs }, { status: 200 });
   } catch (error) {
-    console.error(error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    console.error("Error fetching programs:", error);
+    return NextResponse.json(
+      { error: "Internal Server Error fetching programs" },
+      { status: 500 }
+    );
   }
-} 
+}

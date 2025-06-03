@@ -35,7 +35,9 @@ export default function AllUniversitiesPage() {
         universities.filter(
           (u) =>
             u.name?.toLowerCase().includes(search.toLowerCase()) ||
-            u.location?.toLowerCase().includes(search.toLowerCase())
+            u.location?.toLowerCase().includes(search.toLowerCase()) ||
+            u.fees?.includes(search) ||
+            u.annual_fees?.includes(search)
         )
       );
     }
@@ -170,7 +172,7 @@ export default function AllUniversitiesPage() {
         <div className="flex justify-center mb-8">
           <input
             type="text"
-            placeholder="Search by name or location..."
+            placeholder="Search by name, location or budget..."
             className="w-full max-w-md px-4 py-3 rounded-lg border border-gray-200 focus:border-red focus:ring-2 focus:ring-red focus:ring-opacity-30 transition-all"
             value={search}
             onChange={e => setSearch(e.target.value)}
@@ -191,6 +193,7 @@ export default function AllUniversitiesPage() {
                 <div className="relative h-48 overflow-hidden flex items-center justify-center bg-gray-100">
                   {university.uni_image ? (
                     <img
+                    onClick={() => router.push(`/universities/programs/${university.id}`)}
                       src={university.uni_image}
                       alt={`${university.name} campus`}
                       className="w-full h-full object-cover transition-transform hover:scale-110 duration-700"
@@ -207,7 +210,7 @@ export default function AllUniversitiesPage() {
                 </div>
                 <div className="p-5">
                   <div className="flex justify-between items-start mb-4">
-                    <h3 className="text-xl font-bold text-navy">{university.name}</h3>
+                    <h3 onClick={() => router.push(`/universities/programs/${university.id}`)} className="text-xl font-bold text-navy">{university.name}</h3>
                   </div>
                   <div className="flex flex-wrap gap-2 mb-4">
                     {university.campus && (

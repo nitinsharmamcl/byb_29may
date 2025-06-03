@@ -150,7 +150,8 @@ const LandingPage = () => {
     { name: 'Courses', href: '#courses' },
     { name: 'Programs', href: '#programs' },
     // { name: 'Reviews', href: '#testimonials' },
-    { name: 'Counseling', href: '#counseling' }
+    { name: 'Counseling', href: '#counseling' },
+    { name: 'Suggest in 2 mins', href: '/suggestpage' }
   ];
 
   // Scroll listener for navbar
@@ -167,7 +168,10 @@ const LandingPage = () => {
 
   // Navigation click handler with smooth scroll
   const handleNavClick = (href) => {
-    if (href === '#') {
+    if (href === '/suggestpage') {
+      router.push('/suggestpage');
+    }
+    else if (href === '#') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
       const element = document.querySelector(href);
@@ -180,7 +184,7 @@ const LandingPage = () => {
     setIsMenuOpen(false);
   };
 
-  // Form handlers
+
 
   const handleSelectChange = (e) => {
     const { id, value } = e.target;
@@ -365,17 +369,14 @@ const LandingPage = () => {
     router.push(path);
   }
 
+
   const closeUniversityModal = () => {
     setIsUniversityModalOpen(false);
     setSelectedUniversity(null);
     setSelectedDegreeType(null); // Reset the selected degree type
   };
 
-  // Helper to get country name by id
-  const getCountryName = (id) => {
-    const country = countries.find((c) => c.id === id);
-    return country ? country.name : "Unknown Country";
-  };
+
 
   const [programs, setPrograms] = useState([]);
   const [courses, setCourses] = useState([]);
@@ -710,9 +711,10 @@ const LandingPage = () => {
                     <div className="relative h-48 overflow-hidden flex items-center justify-center bg-gray-100">
                       {university?.uni_image ? (
                         <img
+                        onClick={() => router.push(`/universities/programs/${university.id}`)}
                           src={university?.uni_image}
                           alt={`${university.name} campus`}
-                          className="w-full h-full object-cover transition-transform hover:scale-110 duration-700"
+                          className="w-full h-full object-cover cursor-pointer transition-transform hover:scale-110 duration-700"
                         />
                       ) : (
                         <FaUniversity className="w-20 h-20 text-navy opacity-30" />
@@ -725,7 +727,7 @@ const LandingPage = () => {
                       </div>
                     </div>
                     <div className="p-5">
-                      <div className="flex justify-between items-start mb-4">
+                      <div onClick={() => router.push(`/universities/programs/${university.id}`)} className="flex justify-between items-start mb-4 cursor-pointer ">
                         <h3 className="text-xl font-bold text-navy">{university.name}</h3>
                         {/* Optionally add a rating or badge here */}
                       </div>
@@ -853,7 +855,18 @@ const LandingPage = () => {
                     </button>
                   </div>
                 ))}
+
+                       
               </div>
+                   <div className="text-center mt-10 animate-fade-in-up" style={{ animationDelay: "0.4s" }}>
+              <button
+                onClick={() => router.push("/programs")}
+                className="inline-flex items-center px-6 py-3 border border-red text-red font-semibold rounded-full hover:bg-red hover:bg-opacity-10 transition-colors transform hover:scale-105"
+              >
+                <span>View All Programs</span>
+                <FaArrowRight className="h-5 w-5 ml-2" />
+              </button>
+            </div>
               <button
                 className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white border rounded-full shadow p-2 disabled:opacity-30"
                 onClick={() => setProgramScrollIndex(i => Math.min(programs.length - 3, i + 1))}
